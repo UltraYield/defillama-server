@@ -5,17 +5,25 @@ ROOT_DIR=$SCRIPT_DIR/../../..
 CURRENT_COMMIT_HASH=$(git rev-parse HEAD)
 echo "$CURRENT_COMMIT_HASH" >  $ROOT_DIR/.current_commit_hash
 
-git pull
-git submodule update --init --recursive
-git submodule update --remote --merge
 
-time npm i
-git checkout HEAD -- package-lock.json # reset any changes to package-lock.json
+# Check if CUSTOM_GIT_BRANCH_DEPLOYMENT environment variable is set
+if [ -n "$CUSTOM_GIT_BRANCH_DEPLOYMENT" ]; then
+    echo "***WARNING***: Custom branch deployment requested: $CUSTOM_GIT_BRANCH_DEPLOYMENT"
+    # Checkout the specified branch
+    git checkout "$CUSTOM_GIT_BRANCH_DEPLOYMENT"
+    # Pull latest code from the branch
+    git pull origin "$CUSTOM_GIT_BRANCH_DEPLOYMENT"
+# else
+    # echo "Using default branch deployment: $(git branch --show-current)"
+fi
 
+git pull -q
 
-time npm run prebuild
-time npm run api2-cron-task
-time npm run cron-dimensions
+time pnpm run --silent init-defi
+time pnpm run --silent cron-raises
+time pnpm run --silent api2-cron-task
+time pnpm run --silent cron-dimensions
+time pnpm run --silent cron-app-metadata
 
 # start API2 server
 timeout 6m npx pm2 startOrReload src/api2/ecosystem.config.js

@@ -11,7 +11,7 @@ import * as graphCoins from "./markets/graphCoins";
 export default {
   ...compound.adapters,
   ...aave.adapters,
-  ...euler.adapters,
+  ...euler.adapters, 
   ...uniswap.adapters,
   ...curve.adapters,
   ...balancer.adapters,
@@ -170,4 +170,5 @@ export default {
   fluidSmartLending: require("./markets/fluidSmartLending"),
   rhea: require("./markets/rhea"),
   bracket: require("./yield/bracket"),
+  goblin: require("./markets/goblin"),
 };
